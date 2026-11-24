@@ -102,6 +102,18 @@ function clock(n){n=((n%1440)+1440)%1440;return pad(Math.floor(n/60))+':'+pad(n%
 function fmtMin(n){let h=Math.floor(n/60),m=n%60;return (h?h+' h ':'')+(m?m+' min':(h?'':'0 min'))}
 function dateFmt(s){if(!s)return '—';let [y,m,d]=s.split('-');return d+'/'+m+'/'+y}
 function pct(n){return (n*100).toLocaleString('es-ES',{maximumFractionDigits:2,minimumFractionDigits:2})+' %'}
+
+// Ajusta automáticamente el periodo según la opción elegida.
+// El año se toma de la fecha de inicio seleccionada.
+function syncPeriod(){
+ let start=$('startDate').value;
+ if(!start)return;
+ let year=start.slice(0,4);
+ if($('fullYear').value==='si'){
+   $('startDate').value=year+'-01-01';
+ }
+ $('endDate').value=year+'-12-31';
+}
 function render(){
  let code=$('shift').value,mins=Number($('hours').value||0)*60+Number($('minutes').value||0),edge=$('edge').value;
  let shiftPct=DATA.pct[code]??1,dayRatio=Math.max(0,1-mins/480),final=dayRatio*shiftPct;
@@ -122,6 +134,10 @@ function render(){
    return `<tr><td><span class="pill">${t.code}</span></td><td>${start}</td><td>${end}</td></tr>`;
  }).join('');
 }
-['shift','edge','hours','minutes','fullYear','startDate','endDate','vacation'].forEach(id=>$(id).addEventListener('input',render));
+$('fullYear').addEventListener('change',()=>{syncPeriod();render()});
+$('startDate').addEventListener('change',()=>{syncPeriod();render()});
+['shift','edge','hours','minutes','startDate','endDate','vacation'].forEach(id=>$(id).addEventListener('input',render));
+// Aplica el periodo correcto también al cargar la calculadora.
+syncPeriod();
 render();
 </script></body></html>
